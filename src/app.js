@@ -19,8 +19,8 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.get("/user", async (req, res) => {
-  const email = req.body.emailId;
+app.get("/user/:emailId", async (req, res) => {
+  const email = req.params.emailId;
   console.log(email);
   try {
     const user = await User.find({ emailId: email });
@@ -64,7 +64,29 @@ app.delete("/user", async (req, res) => {
 app.patch("/user", async (req, res) => {
   const userId = req.body._id;
   const data = req.body;
+
   try {
+    const allowedData = [
+      "userId",
+      "photoUrl",
+      "about",
+      "skills",
+      "gender",
+      "age",
+    ];
+
+    const isUpdateAllowed = Object.keys(data).every((key) =>
+      key.includes(allowedData)
+    );
+
+    if (!isUpdateAllowed) {
+      return res.status(400).send("Updates not allowed!");
+    }
+
+    if (data.skills.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+
     const user = await User.findByIdAndUpdate({ _id: userId }, data);
     if (!user) {
       return res.status(404).send("User not found");
