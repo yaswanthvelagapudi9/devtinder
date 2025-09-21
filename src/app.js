@@ -5,17 +5,10 @@ const { adminAuth, userAuth } = require("./middleware/auth");
 
 const app = express();
 
-app.post("/signup", async (req, res) => {
-  const userObj = {
-    firstName: "Yaswanth",
-    lastName: "Velagapudi",
-    emailId: "yaswanth@example.com",
-    password: "password@123",
-    age: 25,
-    gender: "Male",
-  };
+app.use(express.json());
 
-  const user = new User(userObj);
+app.post("/signup", async (req, res) => {
+  const user = new User(req.body);
 
   try {
     await user.save();
