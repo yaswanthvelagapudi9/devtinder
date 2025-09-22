@@ -2,17 +2,50 @@ const express = require("express");
 const { connectToDb } = require("./config/database");
 const { User } = require("./models/user");
 const { adminAuth, userAuth } = require("./middleware/auth");
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
   try {
+    validateSignUpData(req);
+    const { firstName, lastName, emailId, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: hashedPassword,
+    });
+
     await user.save();
     res.send("User addded successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Something went wrong");
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    const user = await User.findOne({ emailId });
+
+    if (!user) {
+      throw new Error("EmailId not found");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      res.status(200).send("Login successful");
+    } else {
+      throw new Error("Invalid password");
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send("Something went wrong");
