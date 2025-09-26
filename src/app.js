@@ -6,77 +6,18 @@ const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestsRouter = require("./routes/requests");
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.post("/signup", async (req, res) => {
-  try {
-    validateSignUpData(req);
-    const { firstName, lastName, emailId, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: hashedPassword,
-    });
-
-    await user.save();
-    res.send("User addded successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Something went wrong");
-  }
-});
-
-app.post("/login", async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-
-    const user = await User.findOne({ emailId });
-
-    if (!user) {
-      throw new Error("EmailId not found");
-    }
-
-    const isPasswordValid = await user.validatePassword(password);
-
-    if (isPasswordValid) {
-      const token = await user.getJWT();
-      console.log(token);
-      res.cookie("token", token, {
-        expires: new Date(Date.now() + 8 * 3600000),
-      });
-      res.status(200).send("Login successful");
-    } else {
-      throw new Error("Invalid password");
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Something went wrong");
-  }
-});
-
-app.get("/profile", userAuth, async (req, res) => {
-  try {
-    const user = req.user;
-    res.send(user);
-  } catch (error) {
-    res.status(401).send("Unauthorized: No token provided");
-  }
-});
-
-app.post("/sendConnectionRequest", userAuth, async (req, res) => {
-  try {
-    const user = req.user;
-    res.send(user.firstName + " sent the connection request");
-  } catch (error) {
-    res.status(500).send("Something went wrong");
-  }
-});
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestsRouter);
 
 // app.get("/user/:emailId", async (req, res) => {
 //   const email = req.params.emailId;

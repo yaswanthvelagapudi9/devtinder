@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema(
     age: { type: Number, min: 18, max: 100 },
     gender: {
       type: String,
+      enum: {
+        values: ["male", "female", "other", "Male", "Female", "Other"],
+        message: "{VALUE} is not a valid gender type",
+      },
       validate(value) {
         if (
           ![
@@ -86,4 +90,4 @@ userSchema.methods.validatePassword = async function (password) {
 
 const User = mongoose.model("User", userSchema);
 
-module.exports = { User };
+module.exports = User;
