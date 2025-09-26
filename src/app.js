@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestsRouter = require("./routes/requests");
+const userRouter = require("./routes/userrouter");
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestsRouter);
+app.use("/", userRouter);
 
 // app.get("/user/:emailId", async (req, res) => {
 //   const email = req.params.emailId;
