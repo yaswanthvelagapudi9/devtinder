@@ -100,7 +100,7 @@ requestsRouter.post(
       const data = await connectionRequest.save();
 
       res.status(200).json({
-        message: "Connection request" + status,
+        message: "Connection request " + status,
         data,
       });
     } catch (err) {
