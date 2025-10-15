@@ -11,6 +11,7 @@ authRouter.post("/signup", async (req, res) => {
     validateSignUpData(req);
     const { firstName, lastName, emailId, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = new User({
       firstName,
       lastName,
@@ -18,8 +19,15 @@ authRouter.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
-    await user.save();
-    res.send("User addded successfully");
+    const savedUser = await user.save();
+    const token = await savedUser.getJWT();
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000),
+      // httpOnly: true,
+      // secure: false, // true if using HTTPS
+      // sameSite: "lax",
+    });
+    res.json({ message: "User added successfully", data: savedUser });
   } catch (err) {
     console.error(err);
     res.status(500).send("Something went wrong");
@@ -43,8 +51,11 @@ authRouter.post("/login", async (req, res) => {
       console.log(token);
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
+        // httpOnly: true,
+        // secure: false, // true if using HTTPS
+        // sameSite: "lax",
       });
-      res.status(200).send("Login successful");
+      res.status(200).send(user);
     } else {
       throw new Error("Invalid password");
     }

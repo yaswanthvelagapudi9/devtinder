@@ -3,6 +3,7 @@ const { userAuth } = require("../middleware/auth");
 const { ConnectionRequest } = require("../models/connectionRequests");
 const User = require("../models/user");
 const { Connection } = require("mongoose");
+const sendEmail = require("../utils/sendEmail.js");
 
 const requestsRouter = express.Router();
 
@@ -50,6 +51,12 @@ requestsRouter.post(
       });
 
       const data = await connectionRequest.save();
+      const emailResponse = await sendEmail.run(
+        "A new connection request from " + req.user.firstName,
+        toUser.emailId,
+        "You have a new connection request from " + req.user.firstName
+      );
+      console.log("Email sent response: ", emailResponse);
 
       res.json({
         message:

@@ -62,7 +62,7 @@ const userSchema = new mongoose.Schema(
     photoURL: {
       type: String,
       default:
-        "https://pixabay.com/vectors/blank-profile-picture-mystery-man-973460/",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCbU49DD_iYcjSUEXG-Oy7POjJzaMn1GYEZg&s",
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error("Invalid URL");
